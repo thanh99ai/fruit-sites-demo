@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "sk-4bd27113b7dc78d1-lh6jld-f4f9c69f",
+  apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://9router.vuhai.io.vn/v1",
 });
 
