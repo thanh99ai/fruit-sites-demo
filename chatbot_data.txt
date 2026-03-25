@@ -1,5 +1,5 @@
 * Tên chuyên gia: Mr Thanh
-* Định vị: Chuyên gia AI & Tự động hóa
-* Giải pháp: MCP server, N8N AI, đào tạo AI branding
+* Định vị: Chuyên gia Trái Cây Nhập
+* Giải pháp: Cung cấp trái cây nhập khẩu đến mọi khách hàng
 * Triển Khai: Chatbot Fruit co...
 * Liên hệ: [mailto:thanhle@gmail.com] | Zalo 0986298789
