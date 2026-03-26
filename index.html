@@ -926,6 +926,34 @@
     <span class="material-symbols-outlined" style="font-size: 34px;">chat_bubble</span>
   </div>
 
+  <!-- Order Modal -->
+  <div id="order-modal-overlay" class="modal-overlay">
+    <div class="order-modal">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="font-headline text-3xl text-primary">Đặt Hàng Ngay</h2>
+        <span class="material-symbols-outlined cursor-pointer hover:rotate-90 transition-transform" onclick="closeOrderModal()">close</span>
+      </div>
+      <form id="order-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Tên khách hàng</label>
+          <input type="text" id="cust-name" class="form-input" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Số điện thoại</label>
+          <input type="tel" id="cust-phone" class="form-input" placeholder="098xxxxxxxx" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Nội dung mua hàng</label>
+          <textarea id="order-details" class="form-input h-28" placeholder="Tôi muốn đặt 2kg Cherry Úc..."></textarea>
+        </div>
+        <button type="submit" class="w-full bg-primary text-on-primary py-4 rounded-full font-semibold text-lg hover:shadow-xl transition-all mt-4">
+          Xác nhận đặt hàng
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     /* Logic & API Integration */
     const chatWrapper = document.getElementById('chatbot-wrapper');
@@ -935,7 +963,7 @@
     const refreshBtn = document.getElementById('refresh-btn');
 
     let chatHistory = [];
-    const welcomeText = "👋 Chào bạn! Tôi là trợ lý AI chuyên nghiệp của Mr Thanh. Tôi có thể hỗ trợ quý khách về các giải pháp AI, Automation và Đào tạo. Quý khách muốn tìm hiểu về dịch vụ nào ạ?";
+    const welcomeText = "👋 Chào bạn! Tôi là trợ lý AI chuyên gia về Trái Cây Nhập Khẩu của Fruitico JSC. Tôi có thể hỗ trợ quý khách về các loại hoa quả chất lượng nhất thị trường. Quý khách muốn tìm hiểu về sản phẩm nào ạ?";
 
     function toggleChat() {
       chatWrapper.classList.toggle('chatbot-hidden');
@@ -1077,33 +1105,6 @@
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
     refreshBtn.addEventListener('click', resetChat);
   </script>
-
-  <!-- Order Modal -->
-  <div id="order-modal-overlay" class="modal-overlay">
-    <div class="order-modal">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="font-headline text-3xl text-primary">Đặt Hàng Ngay</h2>
-        <span class="material-symbols-outlined cursor-pointer hover:rotate-90 transition-transform" onclick="closeOrderModal()">close</span>
-      </div>
-      <form id="order-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Tên khách hàng</label>
-          <input type="text" id="cust-name" class="form-input" placeholder="Nguyễn Văn A" required>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Số điện thoại</label>
-          <input type="tel" id="cust-phone" class="form-input" placeholder="098xxxxxxxx" required>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Nội dung mua hàng</label>
-          <textarea id="order-details" class="form-input h-28" placeholder="Tôi muốn đặt 2kg Cherry Úc..."></textarea>
-        </div>
-        <button type="submit" class="w-full bg-primary text-on-primary py-4 rounded-full font-semibold text-lg hover:shadow-xl transition-all mt-4">
-          Xác nhận đặt hàng
-        </button>
-      </form>
-    </div>
-  </div>
 </body>
 
 </html>
