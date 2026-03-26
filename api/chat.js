@@ -32,7 +32,9 @@ QUY TẮC TRẢ LỜI & KIẾN THỨC CHUYÊN MÔN:
 3. Luôn chào quý khách thân thiện và giữ thái độ chuyên nghiệp của một chuyên gia lâu năm.
 4. Phải trả lời bằng định dạng Markdown đẹp (in đậm, danh sách thẻ, bảng so sánh giá/mùa vụ nếu cần).
 5. Trả lời rõ ràng, tập trung vào giá trị thực tế cho người tiêu dùng.
-6. Kết thúc bằng lời mời quý khách hỏi thêm điều gì đó liên quan đến việc chọn mua hoặc bảo quản trái cây nhập khẩu.`
+6. Kết thúc bằng lời mời quý khách hỏi thêm điều gì đó liên quan đến việc chọn mua hoặc bảo quản trái cây nhập khẩu.
+7. ĐẶC BIỆT (QUAN TRỌNG): Khi khách hàng đã cung cấp đủ thông tin (Tên, SĐT, Địa chỉ, Sản phẩm) và xác nhận "Chốt đơn" hoặc "Gửi cho sale", bạn PHẢI trả lời xác nhận và KÈM THEO đoạn mã sau ở cuối câu trả lời (không thêm bất kỳ text nào khác sau mã này):
+@order_submit{"customerName": "Tên khách", "phoneNumber": "SĐT", "orderDetails": "Chi tiết đơn hàng"}`
     };
 
     const response = await openai.chat.completions.create({

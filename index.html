@@ -992,14 +992,39 @@
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${role === 'user' ? 'user-msg' : 'bot-msg chat-markdown'}`;
 
-      // Render Markdown using marked.js
-      if (role === 'bot') {
-        bubble.innerHTML = marked.parse(text);
-      } else {
-        bubble.textContent = text;
+      let displayInfo = text;
+      
+      // Auto-Submit Logic for AI response
+      if (role === 'bot' && text.includes('@order_submit')) {
+        const parts = text.split('@order_submit');
+        displayInfo = parts[0].trim(); // Clean text for UI
+        try {
+          const rawJSON = parts[1].trim();
+          const orderData = JSON.parse(rawJSON);
+          // Auto fire submission
+          fetch('/api/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+          }).then(res => {
+            if(res.ok) {
+              const checkmark = document.createElement('div');
+              checkmark.className = 'text-xs text-green-600 font-bold mt-2 flex items-center gap-1';
+              checkmark.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Đã đẩy đơn hàng về Google Sheet thành công!';
+              wrapper.appendChild(checkmark);
+            }
+          });
+        } catch(e) { console.error("Auto order parse error:", e); }
       }
 
-      wrapper.appendChild(bubble);
+      // Render Markdown using marked.js
+      if (role === 'bot') {
+        bubble.innerHTML = marked.parse(displayInfo);
+      } else {
+        bubble.textContent = displayInfo;
+      }
+
+      wrapper.prepend(bubble);
       chatContent.appendChild(wrapper);
       chatContent.scrollTop = chatContent.scrollHeight;
 
