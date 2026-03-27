@@ -962,6 +962,12 @@
     const submitBtn = document.getElementById('submit-btn');
     const refreshBtn = document.getElementById('refresh-btn');
 
+    // ============================================================
+    // CẤU HÌNH LEAD TRACKING NÂNG CAO
+    // ============================================================
+    const GOOGLE_SCRIPT_URL = 'VUI_LONG_NHAP_URL_GOOGLE_APPS_SCRIPT_MOI';
+    const AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
     let chatHistory = [];
     const welcomeText = "👋 Chào bạn! Tôi là trợ lý AI chuyên gia về Trái Cây Nhập Khẩu của Fruitico JSC. Tôi có thể hỗ trợ quý khách về các loại hoa quả chất lượng nhất thị trường. Quý khách muốn tìm hiểu về sản phẩm nào ạ?";
 
@@ -974,50 +980,75 @@
     }
 
     function resetChat() {
-      // Logic nút Refresh
       refreshBtn.classList.add('rotate-anim');
       chatContent.innerHTML = '';
       chatHistory = [];
-
       setTimeout(() => {
         appendUIMessage(welcomeText, 'bot');
         refreshBtn.classList.remove('rotate-anim');
-      }, 500); // Bắt buộc 500ms
+      }, 500);
+    }
+
+    /**
+     * Bóc tách LEAD_DATA và gửi về Google Sheet
+     */
+    function processAIResponse(aiResponse, historyArray) {
+      const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
+      
+      // Định dạng lịch sử chat để lưu vào Google Sheet
+      const formattedHistory = historyArray.map(msg => {
+        let role = msg.role === 'user' ? 'Khách' : 'AI';
+        let content = msg.content.replace(dataPattern, "").trim();
+        return `${role}: ${content}`;
+      }).join('\n\n');
+
+      if (aiResponse.includes("||LEAD_DATA:")) {
+        const match = aiResponse.match(dataPattern);
+        if (match && match[1]) {
+          try {
+            const leadData = JSON.parse(match[1]);
+            if (leadData.name || leadData.phone || leadData.email) {
+              sendLeadToGoogleSheets(leadData, formattedHistory);
+            }
+          } catch (e) { console.error("Parse lead error:", e); }
+        }
+        aiResponse = aiResponse.replace(dataPattern, "").trim();
+      }
+      return aiResponse;
+    }
+
+    async function sendLeadToGoogleSheets(leadData, chatHistoryText) {
+      if (GOOGLE_SCRIPT_URL === 'VUI_LONG_NHAP_URL_GOOGLE_APPS_SCRIPT_MOI') return;
+      
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: leadData.name || '',
+            phone: leadData.phone || '',
+            email: leadData.email || '',
+            source: window.location.href,
+            sessionId: AI_CHAT_SESSION_ID,
+            chatHistory: chatHistoryText,
+            timestamp: new Date().toLocaleString('vi-VN')
+          })
+        });
+      } catch (err) { console.warn("Lead sync error:", err); }
     }
 
     function appendUIMessage(text, role) {
       const wrapper = document.createElement('div');
       wrapper.className = 'msg-wrapper';
-
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${role === 'user' ? 'user-msg' : 'bot-msg chat-markdown'}`;
 
       let displayInfo = text;
-      
-      // Auto-Submit Logic for AI response
-      if (role === 'bot' && text.includes('@order_submit')) {
-        const parts = text.split('@order_submit');
-        displayInfo = parts[0].trim(); // Clean text for UI
-        try {
-          const rawJSON = parts[1].trim();
-          const orderData = JSON.parse(rawJSON);
-          // Auto fire submission
-          fetch('/api/order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-          }).then(res => {
-            if(res.ok) {
-              const checkmark = document.createElement('div');
-              checkmark.className = 'text-xs text-green-600 font-bold mt-2 flex items-center gap-1';
-              checkmark.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Đã đẩy đơn hàng về Google Sheet thành công!';
-              wrapper.appendChild(checkmark);
-            }
-          });
-        } catch(e) { console.error("Auto order parse error:", e); }
+      if (role === 'bot') {
+        displayInfo = processAIResponse(text, chatHistory);
       }
 
-      // Render Markdown using marked.js
       if (role === 'bot') {
         bubble.innerHTML = marked.parse(displayInfo);
       } else {
