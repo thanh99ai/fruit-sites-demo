@@ -943,6 +943,10 @@
           <input type="tel" id="cust-phone" class="form-input" placeholder="098xxxxxxxx" required>
         </div>
         <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Địa chỉ giao hàng</label>
+          <input type="text" id="cust-address" class="form-input" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố" required>
+        </div>
+        <div>
           <label class="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2 px-1">Nội dung mua hàng</label>
           <textarea id="order-details" class="form-input h-28" placeholder="Tôi muốn đặt 2kg Cherry Úc..."></textarea>
         </div>
@@ -1079,6 +1083,7 @@
       const orderData = {
         customerName: document.getElementById('cust-name').value,
         phoneNumber: document.getElementById('cust-phone').value,
+        address: document.getElementById('cust-address').value,
         orderDetails: document.getElementById('order-details').value
       };
 
