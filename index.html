@@ -963,9 +963,8 @@
     const refreshBtn = document.getElementById('refresh-btn');
 
     // ============================================================
-    // CẤU HÌNH LEAD TRACKING NÂNG CAO
+    // CẤU HÌNH LEAD TRACKING NÂNG CAO (GỬI QUA BACKEND)
     // ============================================================
-    const GOOGLE_SCRIPT_URL = 'VUI_LONG_NHAP_URL_GOOGLE_APPS_SCRIPT_MOI';
     const AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
     let chatHistory = [];
@@ -989,70 +988,16 @@
       }, 500);
     }
 
-    /**
-     * Bóc tách LEAD_DATA và gửi về Google Sheet
-     */
-    function processAIResponse(aiResponse, historyArray) {
-      const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
-      
-      // Định dạng lịch sử chat để lưu vào Google Sheet
-      const formattedHistory = historyArray.map(msg => {
-        let role = msg.role === 'user' ? 'Khách' : 'AI';
-        let content = msg.content.replace(dataPattern, "").trim();
-        return `${role}: ${content}`;
-      }).join('\n\n');
-
-      if (aiResponse.includes("||LEAD_DATA:")) {
-        const match = aiResponse.match(dataPattern);
-        if (match && match[1]) {
-          try {
-            const leadData = JSON.parse(match[1]);
-            if (leadData.name || leadData.phone || leadData.email) {
-              sendLeadToGoogleSheets(leadData, formattedHistory);
-            }
-          } catch (e) { console.error("Parse lead error:", e); }
-        }
-        aiResponse = aiResponse.replace(dataPattern, "").trim();
-      }
-      return aiResponse;
-    }
-
-    async function sendLeadToGoogleSheets(leadData, chatHistoryText) {
-      if (GOOGLE_SCRIPT_URL === 'VUI_LONG_NHAP_URL_GOOGLE_APPS_SCRIPT_MOI') return;
-      
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: leadData.name || '',
-            phone: leadData.phone || '',
-            email: leadData.email || '',
-            source: window.location.href,
-            sessionId: AI_CHAT_SESSION_ID,
-            chatHistory: chatHistoryText,
-            timestamp: new Date().toLocaleString('vi-VN')
-          })
-        });
-      } catch (err) { console.warn("Lead sync error:", err); }
-    }
-
     function appendUIMessage(text, role) {
       const wrapper = document.createElement('div');
       wrapper.className = 'msg-wrapper';
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${role === 'user' ? 'user-msg' : 'bot-msg chat-markdown'}`;
 
-      let displayInfo = text;
       if (role === 'bot') {
-        displayInfo = processAIResponse(text, chatHistory);
-      }
-
-      if (role === 'bot') {
-        bubble.innerHTML = marked.parse(displayInfo);
+        bubble.innerHTML = marked.parse(text);
       } else {
-        bubble.textContent = displayInfo;
+        bubble.textContent = text;
       }
 
       wrapper.prepend(bubble);
@@ -1085,7 +1030,11 @@
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: chatHistory })
+          body: JSON.stringify({ 
+            messages: chatHistory,
+            sessionId: AI_CHAT_SESSION_ID,
+            currentUrl: window.location.href
+          })
         });
 
         const data = await response.json();
