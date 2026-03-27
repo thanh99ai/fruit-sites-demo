@@ -59,17 +59,21 @@ Nếu thông tin nào chưa có, hãy để null. TUYỆT ĐỐI KHÔNG giải t
               return `${role}: ${msg.content.replace(dataPattern, "").trim()}`;
             }).join('\n\n') + `\n\nAI (Latest): ${botReply.replace(dataPattern, "").trim()}`;
 
-            // Gửi Proxy không chờ (Fire and Forget) hoặc chờ nếu cần ổn định
-            fetch(process.env.GOOGLE_SCRIPT_URL, {
-              method: 'POST',
-              body: JSON.stringify({
-                ...leadData,
-                source: currentUrl || 'Chatbot Proxy',
-                sessionId: sessionId || 'N/A',
-                chatHistory: formattedHistory,
-                timestamp: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
-              })
-            }).catch(e => console.error("Proxy error:", e));
+            // Gửi Proxy và chờ phản hồi để đảm bảo Vercel không đóng function quá sớm
+            try {
+              await fetch(process.env.GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                  ...leadData,
+                  source: currentUrl || 'Chatbot Proxy',
+                  sessionId: sessionId || 'N/A',
+                  chatHistory: formattedHistory,
+                  timestamp: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+                })
+              });
+            } catch (e) {
+              console.error("Proxy error:", e);
+            }
           }
         } catch (e) { console.error("Backend Parse Lead error:", e); }
       }
