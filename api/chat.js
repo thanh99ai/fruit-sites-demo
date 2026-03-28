@@ -44,7 +44,8 @@ Nếu thông tin nào chưa có, hãy để null. TUYỆT ĐỐI KHÔNG giải t
     });
 
     let botReply = response.choices[0].message.content;
-    const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
+    const dataPattern = /\|\|LEAD_DATA:\s*(\{[\s\S]*?\})\s*\|\|/;
+    const removePattern = /\|\|LEAD_DATA:\s*(\{[\s\S]*?\})\s*\|\|/g;
 
     // XỬ LÝ PROXY DỮ LIỆU LÊN GOOGLE SHEETS TỪ BACKEND
     if (botReply.includes("||LEAD_DATA:") && process.env.GOOGLE_SCRIPT_URL) {
@@ -56,13 +57,14 @@ Nếu thông tin nào chưa có, hãy để null. TUYỆT ĐỐI KHÔNG giải t
             // Định dạng lịch sử chat
             const formattedHistory = messages.map(msg => {
               let role = msg.role === 'user' ? 'Khách' : 'AI';
-              return `${role}: ${msg.content.replace(dataPattern, "").trim()}`;
-            }).join('\n\n') + `\n\nAI (Latest): ${botReply.replace(dataPattern, "").trim()}`;
+              return `${role}: ${msg.content.replace(removePattern, "").trim()}`;
+            }).join('\n\n') + `\n\nAI (Latest): ${botReply.replace(removePattern, "").trim()}`;
 
             // Gửi Proxy và chờ phản hồi để đảm bảo Vercel không đóng function quá sớm
             try {
               await fetch(process.env.GOOGLE_SCRIPT_URL, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   ...leadData,
                   source: currentUrl || 'Chatbot Proxy',
@@ -78,7 +80,7 @@ Nếu thông tin nào chưa có, hãy để null. TUYỆT ĐỐI KHÔNG giải t
         } catch (e) { console.error("Backend Parse Lead error:", e); }
       }
       // Xóa tag khỏi câu trả lời trả về frontend
-      botReply = botReply.replace(dataPattern, "").trim();
+      botReply = botReply.replace(removePattern, "").trim();
     }
 
     res.status(200).json({ reply: botReply });
